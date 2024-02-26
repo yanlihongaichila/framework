@@ -8,7 +8,7 @@ import (
 	"net"
 )
 
-func ConcentGrpc(port int, fu func(s *grpc.Server)) {
+func ConcentGrpc(port int, fu func(s *grpc.Server)) error {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -21,4 +21,5 @@ func ConcentGrpc(port int, fu func(s *grpc.Server)) {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+	return err
 }
