@@ -9,9 +9,9 @@ import (
 var Db *gorm.DB
 
 // 连接mysql
-func InitMysql(store string) {
+func InitMysql() {
 	var err error
-	dsn := "root:root@tcp(127.0.0.1:3306)/" + store + "?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:root@tcp(127.0.0.1:3306)/zg6?charset=utf8mb4&parseTime=True&loc=Local"
 	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
