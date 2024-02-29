@@ -1,54 +1,62 @@
 package nacos
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
-var ConfigAll Config
-
-type Config struct {
-	Mysql struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-		Host     string `json:"host"`
-		Port     string `json:"port"`
-	} `json:"Mysql"`
+type Nacos struct {
+	IpAddr      string // 127.0.0.1
+	Port        uint64 // 8848
+	NamespaceId string
+	DataId      string
+	Group       string
 }
 
-func Nacos() {
-
+func InitNacos(c *Nacos) (string, error) {
 	//create clientConfig
 	clientConfig := constant.ClientConfig{
-		NamespaceId:         "", //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
+		NamespaceId:         c.NamespaceId, //we can create multiple clients with different namespaceId to support multiple namespace.When namespace is public, fill in the blank string here.
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogDir:              "/tmp/nacos/log",
-		CacheDir:            "/tmp/nacos/cache",
+		LogDir:              "tmp/nacos/log",
+		CacheDir:            "tmp/nacos/cache",
 		LogLevel:            "debug",
 	}
-	// At least one ServerConfig
 	serverConfigs := []constant.ServerConfig{
 		{
-			IpAddr: "127.0.0.1",
-			Port:   8848,
+			IpAddr: c.IpAddr,
+			Port:   c.Port,
 		},
 	}
-	// Create config client for dynamic configuration
-	config, _ := clients.CreateConfigClient(map[string]interface{}{
-		"serverConfigs": serverConfigs,
-		"clientConfig":  clientConfig,
-	})
-
-	getConfig, err := config.GetConfig(vo.ConfigParam{
-		DataId: "user",
-		Group:  "DEFAULT_GROUP",
+	// Another way of create config client for dynamic configuration (recommend)
+	configClient, err := clients.NewConfigClient(
+		vo.NacosClientParam{
+			ClientConfig:  &clientConfig,
+			ServerConfigs: serverConfigs,
+		},
+	)
+	if err != nil {
+		return "", err
+	}
+	err = configClient.ListenConfig(vo.ConfigParam{
+		DataId: c.DataId,
+		Group:  c.Group,
+		OnChange: func(namespace, group, dataId, data string) {
+			fmt.Println("group:" + group + ", dataId:" + dataId + ", data:" + data)
+		},
 	})
 	if err != nil {
-		return
+		return "", err
 	}
-	json.Unmarshal([]byte(getConfig), &ConfigAll)
-
+	content, err := configClient.GetConfig(vo.ConfigParam{
+		DataId: c.DataId,
+		Group:  c.Group})
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("nacos content:" + content)
+	return content, nil
 }
