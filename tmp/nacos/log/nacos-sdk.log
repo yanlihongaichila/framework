@@ -1,0 +1,21 @@
+2024-02-29T20:25:16.175+0800	WARN	config_client/config_client.go:328	read cache file Config Encrypted Data Key failed. cause file doesn't exist, file path: tmp/nacos/cache/config/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891.: file not exist
+2024-02-29T20:25:16.175+0800	WARN	cache/disk_cache.go:155	read cache file Config Encrypted Data Key failed. cause file doesn't exist, file path: tmp/nacos/cache/config/encrypted-data-key/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891.: file not exist
+2024-02-29T20:25:16.175+0800	ERROR	cache/disk_cache.go:193	read Config Content failed. cause file doesn't exist, file path: tmp/nacos/cache/config/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891_failover.
+2024-02-29T20:25:16.175+0800	DEBUG	rpc/rpc_client.go:290	config-0-cfdb1b27-1e71-42ff-83f7-4e7f13ad0fad register server push request:ConfigChangeNotifyRequest handler:ConfigChangeNotifyRequestHandler
+2024-02-29T20:25:16.175+0800	DEBUG	rpc/rpc_client.go:290	config-0-cfdb1b27-1e71-42ff-83f7-4e7f13ad0fad register server push request:ConnectResetRequest handler:ConnectResetRequestHandler
+2024-02-29T20:25:16.175+0800	DEBUG	rpc/rpc_client.go:290	config-0-cfdb1b27-1e71-42ff-83f7-4e7f13ad0fad register server push request:ClientDetectionRequest handler:ClientDetectionRequestHandler
+2024-02-29T20:25:16.175+0800	INFO	rpc/rpc_client.go:224	[RpcClient.Start] config-0-cfdb1b27-1e71-42ff-83f7-4e7f13ad0fad try to connect to server on start up, server: {serverIp:127.0.0.1 serverPort:8848 serverGrpcPort:9848}
+2024-02-29T20:25:16.176+0800	INFO	util/common.go:96	Local IP:192.168.0.4
+2024-02-29T20:25:16.227+0800	ERROR	rpc/grpc_client.go:244	1709209516187_192.168.65.1_34495 Unsupported payload type
+2024-02-29T20:25:16.318+0800	INFO	rpc/rpc_client.go:234	config-0-cfdb1b27-1e71-42ff-83f7-4e7f13ad0fad success to connect to server {serverIp:127.0.0.1 serverPort:8848 serverGrpcPort:9848} on start up, connectionId=1709209516187_192.168.65.1_34495
+2024-02-29T20:25:16.331+0800	DEBUG	cache/disk_cache.go:136	no need to delete Config Encrypted Data Key cache file, file path tmp/nacos/cache/config/encrypted-data-key/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891, file doesn't exist.
+2024-02-29T20:25:41.107+0800	WARN	cache/disk_cache.go:155	read cache file Config Encrypted Data Key failed. cause file doesn't exist, file path: tmp/nacos/cache/config/encrypted-data-key/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891.: file not exist
+2024-02-29T20:25:41.107+0800	ERROR	cache/disk_cache.go:193	read Config Content failed. cause file doesn't exist, file path: tmp/nacos/cache/config/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891_failover.
+2024-02-29T20:25:41.107+0800	DEBUG	rpc/rpc_client.go:290	config-0-4608dc55-32d3-4a7f-9421-a085c6e3d86b register server push request:ConfigChangeNotifyRequest handler:ConfigChangeNotifyRequestHandler
+2024-02-29T20:25:41.107+0800	DEBUG	rpc/rpc_client.go:290	config-0-4608dc55-32d3-4a7f-9421-a085c6e3d86b register server push request:ConnectResetRequest handler:ConnectResetRequestHandler
+2024-02-29T20:25:41.107+0800	DEBUG	rpc/rpc_client.go:290	config-0-4608dc55-32d3-4a7f-9421-a085c6e3d86b register server push request:ClientDetectionRequest handler:ClientDetectionRequestHandler
+2024-02-29T20:25:41.107+0800	INFO	rpc/rpc_client.go:224	[RpcClient.Start] config-0-4608dc55-32d3-4a7f-9421-a085c6e3d86b try to connect to server on start up, server: {serverIp:127.0.0.1 serverPort:8848 serverGrpcPort:9848}
+2024-02-29T20:25:41.108+0800	INFO	util/common.go:96	Local IP:192.168.0.4
+2024-02-29T20:25:41.148+0800	ERROR	rpc/grpc_client.go:244	1709209541112_192.168.65.1_34514 Unsupported payload type
+2024-02-29T20:25:41.222+0800	INFO	rpc/rpc_client.go:234	config-0-4608dc55-32d3-4a7f-9421-a085c6e3d86b success to connect to server {serverIp:127.0.0.1 serverPort:8848 serverGrpcPort:9848} on start up, connectionId=1709209541112_192.168.65.1_34514
+2024-02-29T20:25:41.232+0800	DEBUG	cache/disk_cache.go:136	no need to delete Config Encrypted Data Key cache file, file path tmp/nacos/cache/config/encrypted-data-key/user_mysql@@DEFAULT_GROUP@@c787d4e6-a673-4b9e-baa5-2437bae2b891, file doesn't exist.

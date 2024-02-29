@@ -53,9 +53,9 @@ func InitMysql() {
 		return
 	}
 	mConfig := MysqlInfo.Mysql
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", mConfig.User, mConfig.Pwd, mConfig.Host, mConfig.Port, mConfig.Datebase)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mConfig.User, mConfig.Pwd, mConfig.Host, mConfig.Port, mConfig.Datebase)
 	//dsn := "root:root@tcp(127.0.0.1:3306)/zg6?charset=utf8mb4&parseTime=True&loc=Local"
-
+	fmt.Println(dsn)
 	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
