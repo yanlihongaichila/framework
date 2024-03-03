@@ -64,8 +64,6 @@ func InitMysql() {
 	}
 }
 
-// 实时监控Mysql配置
-
 // 回滚
 func WithTX(txFc func(tx *gorm.DB) error) {
 	var err error
