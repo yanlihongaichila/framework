@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/yanlihongaichila/framework/nacos"
+	"gopkg.in/yaml.v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -15,39 +15,59 @@ var Db *gorm.DB
 // 连接mysql
 type MysqlConfig struct {
 	Mysql struct {
-		User     string `json:"user"`
-		Pwd      string `json:"pwd"`
-		Host     string `json:"host"`
-		Port     string `json:"port"`
-		Datebase string `json:"datebase"`
+		User     string `json:"user"     yaml:"User"`
+		Pwd      string `json:"pwd"      yaml:"Pwd"`
+		Host     string `json:"host"     yaml:"Host"`
+		Port     string `json:"port"     yaml:"Port"`
+		Datebase string `json:"datebase" yaml:"Datebase"`
 	} `json:"Mysql"`
 }
 
 // 获取mysql配置
 var MysqlInfo MysqlConfig
 
-func GetMysqlConfig() error {
-	initNacos, err := nacos.InitNacos(&nacos.Nacos{
-		IpAddr:      "127.0.0.1",
-		Port:        8848,
-		NamespaceId: "c787d4e6-a673-4b9e-baa5-2437bae2b891",
-		DataId:      "user_mysql",
-		Group:       "DEFAULT_GROUP",
-	})
+func GetMysqlConfig(serviceName string) error {
+	/*
+		竣文
+	*/
+	//initNacos, err := nacos.InitNacos(&nacos.Nacos{
+	//	IpAddr:      "127.0.0.1",
+	//	Port:        8848,
+	//	NamespaceId: "c787d4e6-a673-4b9e-baa5-2437bae2b891",
+	//	DataId:      "user_mysql",
+	//	Group:       "DEFAULT_GROUP",
+	//})
+	//if err != nil {
+	//	log.Println(err)
+	//	return err
+	//}
+	//err = json.Unmarshal([]byte(initNacos), &MysqlInfo)
+	//if err != nil {
+	//	log.Println(err)
+	//	return err
+	//}
+	//return nil
+	type Val struct {
+		Mysql MysqlConfig `yaml:"mysql"`
+	}
+	mysqlConfigVal := Val{}
+	content, err := nacos.GetConfig("DEFAULT_GROUP", serviceName)
 	if err != nil {
-		log.Println(err)
 		return err
 	}
-	err = json.Unmarshal([]byte(initNacos), &MysqlInfo)
+	err = yaml.Unmarshal([]byte(content), &mysqlConfigVal)
 	if err != nil {
-		log.Println(err)
+		fmt.Println("**********errr")
 		return err
 	}
+	fmt.Println(content)
+	fmt.Println(mysqlConfigVal)
+
 	return nil
 }
 
-func InitMysql() {
-	err := GetMysqlConfig()
+func InitMysql(serviceName string) {
+	err := GetMysqlConfig(serviceName)
 	if err != nil {
 		log.Println("failed to get mysql config")
 		return

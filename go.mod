@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/nacos-group/nacos-sdk-go/v2 v2.2.5
 	google.golang.org/grpc v1.62.0
+	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.4
 	gorm.io/gorm v1.25.7
 )
