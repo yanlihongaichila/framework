@@ -15,36 +15,24 @@ const (
 	GROUP       = "DEFAULT_GROUP"
 )
 
-type GatewayStru struct {
-	APP struct {
-		IPADDR   string `json:"IPADDR"`
-		PORT     string `json:"PORT"`
-		DATABASE string `json:"DATABASE"`
-	} `json:"APP"`
-	Mysql struct {
-		User     string `json:"user"`
-		Pwd      string `json:"pwd"`
-		Host     string `json:"host"`
-		Port     string `json:"port"`
-		Datebase string `json:"datebase"`
-	} `json:"Mysql"`
+type AppConfig struct {
+	Ip     string `yaml:"ip"`
+	Port   string `yaml:"port"`
+	Secret string `yaml:"secret"`
+}
+type Val struct {
+	App AppConfig `yaml:"app"`
 }
 
 func Client(toService string) (*grpc.ClientConn, error) {
-	cnfStr, err := nacos.InitNacos(&nacos.Nacos{
-		IpAddr:      IPADDR,
-		Port:        PORT,
-		NamespaceId: NAMESPACEID,
-		DataId:      toService,
-		Group:       GROUP,
-	})
+	cnfStr, err := nacos.GetConfig("DEFAULT_GROUP", toService)
 	if err != nil {
 		return nil, err
 	}
-	cnf := new(GatewayStru)
-	err = yaml.Unmarshal([]byte(cnfStr), &cnf)
+	cnfs := new(Val)
+	err = yaml.Unmarshal([]byte(cnfStr), &cnfs)
 	if err != nil {
 		return nil, err
 	}
-	return grpc.Dial(fmt.Sprintf("%v:%v", cnf.APP.IPADDR, cnf.APP.PORT), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	return grpc.Dial(fmt.Sprintf("%v:%v", cnfs.App.Ip, cnfs.App.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
