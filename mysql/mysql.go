@@ -14,17 +14,17 @@ var Db *gorm.DB
 
 // 连接mysql
 type MysqlConfig struct {
-	Mysql struct {
-		User     string `json:"user"     yaml:"User"`
-		Pwd      string `json:"pwd"      yaml:"Pwd"`
-		Host     string `json:"host"     yaml:"Host"`
-		Port     string `json:"port"     yaml:"Port"`
-		Datebase string `json:"datebase" yaml:"Datebase"`
-	} `json:"Mysql"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Database string `yaml:"database"`
+}
+type Val struct {
+	Mysql MysqlConfig `yaml:"mysql"`
 }
 
-// 获取mysql配置
-var MysqlInfo MysqlConfig
+var MysqlConfigVal Val
 
 func GetMysqlConfig(serviceName string) error {
 	/*
@@ -47,21 +47,19 @@ func GetMysqlConfig(serviceName string) error {
 	//	return err
 	//}
 	//return nil
-	type Val struct {
-		Mysql MysqlConfig `yaml:"mysql"`
-	}
-	mysqlConfigVal := Val{}
+
 	content, err := nacos.GetConfig("DEFAULT_GROUP", serviceName)
 	if err != nil {
 		return err
 	}
-	err = yaml.Unmarshal([]byte(content), &mysqlConfigVal)
+	err = yaml.Unmarshal([]byte(content), &MysqlConfigVal)
 	if err != nil {
 		fmt.Println("**********errr")
 		return err
 	}
+	fmt.Println("22222222222222")
 	fmt.Println(content)
-	fmt.Println(mysqlConfigVal)
+	fmt.Println(MysqlConfigVal)
 
 	return nil
 }
@@ -72,8 +70,9 @@ func InitMysql(serviceName string) {
 		log.Println("failed to get mysql config")
 		return
 	}
-	mConfig := MysqlInfo.Mysql
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mConfig.User, mConfig.Pwd, mConfig.Host, mConfig.Port, mConfig.Datebase)
+	mConfig := MysqlConfigVal.Mysql
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mConfig.Username, mConfig.Password, mConfig.Host, mConfig.Port, mConfig.Database)
 	//dsn := "root:root@tcp(127.0.0.1:3306)/zg6?charset=utf8mb4&parseTime=True&loc=Local"
 	fmt.Println(dsn)
 	Db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -82,6 +81,7 @@ func InitMysql(serviceName string) {
 	if err != nil {
 		panic("failed to open Mysql database")
 	}
+
 }
 
 // 回滚

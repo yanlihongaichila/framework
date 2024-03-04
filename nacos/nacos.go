@@ -99,6 +99,8 @@ func GetConfig(group, dataID string) (string, error) {
 		Group:  group,
 	})
 	if err != nil {
+		fmt.Println("77777777777")
+		fmt.Println(err)
 		return "", err
 	}
 
