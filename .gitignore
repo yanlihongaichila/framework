@@ -1,3 +1,2 @@
-go.mod
-api/main.go
-rpc/main.go
+main.go
+

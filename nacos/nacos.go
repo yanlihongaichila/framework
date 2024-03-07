@@ -62,7 +62,7 @@ func InitNacos(c *Nacos) (string, error) {
 	return content, nil
 }
 
-const ip = "127.0.0.1"
+const ip = "10.2.171.14"
 const port = 8848
 
 var client config_client.IConfigClient
@@ -94,6 +94,8 @@ func GetClient() error {
 }
 
 func GetConfig(group, dataID string) (string, error) {
+	fmt.Println(group)
+	fmt.Println(dataID)
 	content, err := client.GetConfig(vo.ConfigParam{
 		DataId: dataID,
 		Group:  group,
