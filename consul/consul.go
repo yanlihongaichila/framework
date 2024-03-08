@@ -2,81 +2,99 @@ package consul
 
 import (
 	"fmt"
+	"github.com/yanlihongaichila/framework/nacos"
+	"gopkg.in/yaml.v2"
+
 	"github.com/hashicorp/consul/api"
-	"net"
+	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 )
 
-//func main() {
-//	client, err := capi.NewClient(capi.DefaultConfig())
-//	if err != nil {
-//		panic(err)
-//	}
-//
-//	err = client.Agent().ServiceRegister(&capi.AgentServiceRegistration{
-//		ID:      uuid.NewString(),
-//		Name:    "test",
-//		Tags:    []string{"GRPC"},
-//		Port:    3306,
-//		Address: "127.0.0.1",
-//	})
-//
-//	if err != nil {
-//		fmt.Println(err)
-//		return
-//	}
-//}
+var (
+	ConsulClient *api.Client
+	SrvId        string
+	err          error
+)
 
-// consul 定义一个consul结构体，其内部有一个`*api.Client`字段。
-type consul struct {
-	client *api.Client
+type ConsulConfigs struct {
+	Consul struct {
+		Ip      string `yaml:"ip"`
+		Port    int    `yaml:"port"`
+		Version string `yaml:"version"`
+	} `yaml:"consul"`
 }
 
-// NewConsul 连接至consul服务返回一个consul对象
-func NewConsul(addr string) (*consul, error) {
-	cfg := api.DefaultConfig()
-	cfg.Address = addr
-	c, err := api.NewClient(cfg)
+type RpcConfigs struct {
+	Rpc struct {
+		Address string `yaml:"address"`
+		Port    int    `yaml:"port"`
+		Key     string `yaml:"key"`
+	} `yaml:"rpc"`
+}
+
+func getConsulConfig(group, service string) (string, error) {
+	config, err := nacos.GetConfig(group, service)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &consul{c}, nil
+	return config, nil
 }
 
-// 获取本机的出口IP
-func GetOutboundIP() (net.IP, error) {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+/*
+***************************写到连接rpc中
+ */
+//shh := grpc.NewServer() // 创建gRPC服务器
+//healthcheck := health.NewServer()
+//healthpb.RegisterHealthServer(shh, healthcheck)
+func InitRegisterServer(group, service string) error {
+	consulConfig, err := getConsulConfig(group, service)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	defer conn.Close()
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP, nil
-}
+	consulCon := ConsulConfigs{}
+	gprcCon := RpcConfigs{}
+	err = yaml.Unmarshal([]byte(consulConfig), &consulCon)
+	err = yaml.Unmarshal([]byte(consulConfig), &gprcCon)
+	if err != nil {
+		return err
+	}
 
-// RegisterService 将gRPC服务注册到consul
-func (c *consul) RegisterService(serviceName string, ip string, port int) error {
-	//s := grpc.NewServer() // 创建gRPC服务器
-	//healthcheck := health.NewServer()
-	//healthpb.RegisterHealthServer(s, healthcheck)
+	cfig := consulCon.Consul
+	rfig := gprcCon.Rpc
+	//使用默认配置
+	config := api.DefaultConfig()
 
-	// 健康检查
+	//配置consul的连接地址
+	config.Address = fmt.Sprintf("%s:%d", cfig.Ip, cfig.Port)
+
+	//示例化客户端
+	ConsulClient, err = api.NewClient(config)
+
+	if err != nil {
+		fmt.Println(err)
+		zap.S().Panic(err.Error())
+	}
+
 	check := &api.AgentServiceCheck{
-		GRPC:     fmt.Sprintf("%s:%d", "10.2.171.14", 8077), // 这里一定是外部可以访问的地址
-		Timeout:  "10s",                                     // 超时时间
-		Interval: "10s",                                     // 运行检查的频率
-		// 指定时间后自动注销不健康的服务节点
-		// 最小超时时间为1分钟，收获不健康服务的进程每30秒运行一次，因此触发注销的时间可能略长于配置的超时时间。
+		GRPC:                           fmt.Sprintf("%s:%d", rfig.Address, rfig.Port),
+		Timeout:                        "5s",
+		Interval:                       "5s",
 		DeregisterCriticalServiceAfter: "20s",
 	}
-	srv := &api.AgentServiceRegistration{
-		ID:      fmt.Sprintf("%s-%s-%d", serviceName, ip, port), // 服务唯一ID
-		Name:    serviceName,                                    // 服务名称
-		Tags:    []string{"uuu"},                                // 为服务打标签
-		Address: "10.2.171.14",
-		Port:    port,
-		Check:   check,
-	}
-	return c.client.Agent().ServiceRegister(srv)
-}
 
-//发现
+	//健康检查,检查我们注册的微服务
+	Registration := api.AgentServiceRegistration{}
+	Registration.Address = rfig.Address
+	Registration.Port = rfig.Port
+	Registration.Name = rfig.Key
+	Registration.Tags = []string{cfig.Version}
+	Registration.ID = fmt.Sprintf("%s", uuid.NewV4())
+	SrvId = Registration.ID
+	Registration.Check = check
+
+	err = ConsulClient.Agent().ServiceRegister(&Registration)
+	if err != nil {
+		zap.S().Panic(err.Error())
+	}
+	return nil
+}

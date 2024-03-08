@@ -51,7 +51,7 @@ func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 }
 
 func ConcentGrpcCert(port int, fu func(s *grpc.Server), cert, key string) error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0:%d", port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

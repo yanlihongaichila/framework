@@ -62,12 +62,9 @@ func InitNacos(c *Nacos) (string, error) {
 	return content, nil
 }
 
-const ip = "10.2.171.14"
-const port = 8848
-
 var client config_client.IConfigClient
 
-func GetClient() error {
+func GetClient(ip string, port uint64) error {
 	var err error
 
 	sc := []constant.ServerConfig{
