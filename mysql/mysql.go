@@ -26,7 +26,7 @@ type Val struct {
 
 var MysqlConfigVal Val
 
-func GetMysqlConfig(serviceName string) error {
+func GetMysqlConfig(serviceGroup, serviceName string) error {
 	/*
 		竣文
 	*/
@@ -48,7 +48,7 @@ func GetMysqlConfig(serviceName string) error {
 	//}
 	//return nil
 
-	content, err := nacos.GetConfig("DEFAULT_GROUP", serviceName)
+	content, err := nacos.GetConfig(serviceGroup, serviceName)
 	if err != nil {
 		return err
 	}
@@ -64,8 +64,8 @@ func GetMysqlConfig(serviceName string) error {
 	return nil
 }
 
-func InitMysql(serviceName string) {
-	err := GetMysqlConfig(serviceName)
+func InitMysql(serviceGroup, serviceName string) {
+	err := GetMysqlConfig(serviceGroup, serviceName)
 	if err != nil {
 		log.Println("failed to get mysql config")
 		return

@@ -6,14 +6,14 @@ import (
 )
 
 // 初始化服务
-func Init(nacosAddress, serviceName string, nacosPort uint64, apps ...string) error {
+func Init(nacosAddress, serviceGroup, serviceName string, nacosPort uint64, apps ...string) error {
 	var err error
 	err = nacos.GetClient(nacosAddress, nacosPort)
 
 	for _, app := range apps {
 		switch app {
 		case "mysql":
-			mysql.InitMysql(serviceName)
+			mysql.InitMysql(serviceGroup, serviceName)
 		}
 	}
 
