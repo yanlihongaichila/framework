@@ -6,9 +6,9 @@ import (
 )
 
 // 初始化服务
-func Init(serviceName string, apps ...string) error {
+func Init(nacosAddress, serviceName string, nacosPort uint64, apps ...string) error {
 	var err error
-	err = nacos.GetClient()
+	err = nacos.GetClient(nacosAddress, nacosPort)
 
 	for _, app := range apps {
 		switch app {
