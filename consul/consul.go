@@ -94,13 +94,13 @@ func InitRegisterServer(group, service string) error {
 	rfig := consulCon.Rpc
 
 	//使用默认配置
-	config := api.DefaultConfig()
+	config := api.Config{Address: fmt.Sprintf("%v:%v", ip, cfig.Port)}
 
 	//配置consul的连接地址
 	config.Address = fmt.Sprintf("%v:%v", cfig.Ip, cfig.Port)
 
 	//示例化客户端
-	ConsulClient, err = api.NewClient(config)
+	ConsulClient, err = api.NewClient(&config)
 
 	if err != nil {
 		fmt.Println(err)
