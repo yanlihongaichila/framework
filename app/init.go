@@ -8,7 +8,9 @@ import (
 
 // 初始化服务
 func Init(fileName, filePath, nacosName string, apps ...string) error {
+
 	viper, err := nacos.InitViper(fileName, filePath, nacosName)
+
 	if err != nil {
 		return err
 	}

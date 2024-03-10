@@ -2,9 +2,12 @@ package gprc
 
 import (
 	"fmt"
+	"github.com/yanlihongaichila/framework/consul"
 	"github.com/yanlihongaichila/framework/nacos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"gopkg.in/yaml.v2"
 	"log"
@@ -32,16 +35,27 @@ func getConfig(serviceName string) (*Config, error) {
 }
 func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	cof, err := getConfig(serviceName)
+
 	if err != nil {
 		return err
 	}
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", cof.App.Port))
+	lis, err := net.Listen("tcp", fmt.Sprintf("%v:%v", "0.0.0.0", cof.App.Port))
+
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("failed to listen: %v", err.Error())
 	}
+	err = consul.InitRegisterServer("DEFAULT_GROUP", "grpc")
+	if err != nil {
+
+		return err
+	}
+
 	s := grpc.NewServer()
+	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
 	//反射
 	reflection.Register(s)
+	//支持健康检查
+	//healthpb.RegisterHealthServer(s, health.NewServer())
 	fu(s)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {

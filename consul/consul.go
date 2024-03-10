@@ -1,9 +1,12 @@
 package consul
 
 import (
+	"errors"
 	"fmt"
 	"github.com/yanlihongaichila/framework/nacos"
 	"gopkg.in/yaml.v2"
+	"log"
+	"net"
 
 	"github.com/hashicorp/consul/api"
 	uuid "github.com/satori/go.uuid"
@@ -22,9 +25,6 @@ type ConsulConfigs struct {
 		Port    int    `yaml:"port"`
 		Version string `yaml:"version"`
 	} `yaml:"consul"`
-}
-
-type RpcConfigs struct {
 	Rpc struct {
 		Address string `yaml:"address"`
 		Port    int    `yaml:"port"`
@@ -39,6 +39,35 @@ func getConsulConfig(group, service string) (string, error) {
 	}
 	return config, nil
 }
+func GetIp() (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+
+	for _, i := range interfaces {
+		addrs, err := i.Addrs()
+		if err != nil {
+			continue
+		}
+
+		for _, addr := range addrs {
+			ipNet, isVailIpNet := addr.(*net.IPNet)
+			if isVailIpNet && !ipNet.IP.IsLoopback() {
+				if ipNet.IP.To4() != nil {
+					// 添加一些额外的检测逻辑，例如判断IP地址是否在本地网络范围内
+					if ipNet.IP.IsGlobalUnicast() {
+						// 添加详细的日志输出
+						log.Printf("获取到的IP地址：%s，对应网络接口：%s\n", ipNet.IP.String(), i.Name)
+						return ipNet.IP.String(), nil
+					}
+				}
+			}
+		}
+	}
+
+	return "", errors.New("Unable to find a valid global unicast IP address")
+}
 
 /*
 ***************************写到连接rpc中
@@ -47,25 +76,28 @@ func getConsulConfig(group, service string) (string, error) {
 //healthcheck := health.NewServer()
 //healthpb.RegisterHealthServer(shh, healthcheck)
 func InitRegisterServer(group, service string) error {
+	ip, err := GetIp()
 	consulConfig, err := getConsulConfig(group, service)
+
 	if err != nil {
 		return err
 	}
 	consulCon := ConsulConfigs{}
-	gprcCon := RpcConfigs{}
 	err = yaml.Unmarshal([]byte(consulConfig), &consulCon)
-	err = yaml.Unmarshal([]byte(consulConfig), &gprcCon)
 	if err != nil {
 		return err
 	}
-
+	//consul配置
 	cfig := consulCon.Consul
-	rfig := gprcCon.Rpc
+
+	//rpc配置
+	rfig := consulCon.Rpc
+
 	//使用默认配置
 	config := api.DefaultConfig()
 
 	//配置consul的连接地址
-	config.Address = fmt.Sprintf("%s:%d", cfig.Ip, cfig.Port)
+	config.Address = fmt.Sprintf("%v:%v", cfig.Ip, cfig.Port)
 
 	//示例化客户端
 	ConsulClient, err = api.NewClient(config)
@@ -76,15 +108,16 @@ func InitRegisterServer(group, service string) error {
 	}
 
 	check := &api.AgentServiceCheck{
-		GRPC:                           fmt.Sprintf("%s:%d", rfig.Address, rfig.Port),
+		GRPC:                           fmt.Sprintf("%v:%v", ip, rfig.Port),
 		Timeout:                        "5s",
 		Interval:                       "5s",
 		DeregisterCriticalServiceAfter: "20s",
 	}
 
 	//健康检查,检查我们注册的微服务
+
 	Registration := api.AgentServiceRegistration{}
-	Registration.Address = rfig.Address
+	Registration.Address = ip
 	Registration.Port = rfig.Port
 	Registration.Name = rfig.Key
 	Registration.Tags = []string{cfig.Version}
@@ -93,6 +126,7 @@ func InitRegisterServer(group, service string) error {
 	Registration.Check = check
 
 	err = ConsulClient.Agent().ServiceRegister(&Registration)
+
 	if err != nil {
 		zap.S().Panic(err.Error())
 	}

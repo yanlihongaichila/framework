@@ -71,7 +71,7 @@ func InitMysql(serviceGroup, serviceName string) error {
 		return err
 	}
 	mConfig := MysqlConfigVal.Mysql
-
+	fmt.Println(mConfig)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", mConfig.Username, mConfig.Password, mConfig.Host, mConfig.Port, mConfig.Database)
 	//dsn := "root:root@tcp(127.0.0.1:3306)/zg6?charset=utf8mb4&parseTime=True&loc=Local"
 	fmt.Println(dsn)
