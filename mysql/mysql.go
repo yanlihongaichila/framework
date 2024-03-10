@@ -64,11 +64,11 @@ func GetMysqlConfig(serviceGroup, serviceName string) error {
 	return nil
 }
 
-func InitMysql(serviceGroup, serviceName string) {
+func InitMysql(serviceGroup, serviceName string) error {
 	err := GetMysqlConfig(serviceGroup, serviceName)
 	if err != nil {
 		log.Println("failed to get mysql config")
-		return
+		return err
 	}
 	mConfig := MysqlConfigVal.Mysql
 
@@ -79,9 +79,9 @@ func InitMysql(serviceGroup, serviceName string) {
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		panic("failed to open Mysql database")
+		return err
 	}
-
+	return nil
 }
 
 // 回滚
