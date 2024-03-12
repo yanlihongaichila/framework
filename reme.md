@@ -1,0 +1,28 @@
+SELECT category, COUNT(*) AS total_products
+FROM products
+GROUP BY category;
+
+SELECT
+SUM(CASE WHEN stock BETWEEN 1 AND 100 THEN 1 ELSE 0 END) AS stock_1_to_100,
+SUM(CASE WHEN stock BETWEEN 101 AND 200 THEN 1 ELSE 0 END) AS stock_101_to_200,
+SUM(CASE WHEN stock BETWEEN 201 AND 300 THEN 1 ELSE 0 END) AS stock_201_to_300
+FROM inventory;
+
+
+SELECT
+CASE
+WHEN stock BETWEEN 1 AND 100 THEN '1-100'
+WHEN stock BETWEEN 101 AND 200 THEN '101-200'
+WHEN stock BETWEEN 201 AND 300 THEN '201-300'
+ELSE '其他'
+END AS stock_range,
+GROUP_CONCAT(product_name) AS product_names
+FROM products
+Left JOIN inventory ON products.product_id = inventory.product_id
+GROUP BY
+CASE
+WHEN stock BETWEEN 1 AND 100 THEN '1-100'
+WHEN stock BETWEEN 101 AND 200 THEN '101-200'
+WHEN stock BETWEEN 201 AND 300 THEN '201-300'
+ELSE '其他'
+END;
