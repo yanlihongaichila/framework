@@ -1,10 +1,9 @@
 package gprc
 
 import (
-	"fmt"
+	"github.com/yanlihongaichila/framework/consul"
 	"github.com/yanlihongaichila/framework/nacos"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"gopkg.in/yaml.v2"
 )
 
@@ -34,5 +33,9 @@ func Client(toService string) (*grpc.ClientConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	return grpc.Dial(fmt.Sprintf("%v:%v", cnfs.App.Ip, cnfs.App.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	ip, err := consul.GetIp()
+	if err != nil {
+		return nil, err
+	}
+	return grpc.Dial("consul://"+ip+":8500/"+cnfs.App.Secret+"?wait=14s", grpc.WithInsecure(), grpc.WithDefaultServiceConfig(`{"LoadBalancingPolicy": "round_robin"}`))
 }
