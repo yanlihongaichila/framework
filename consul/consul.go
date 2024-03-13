@@ -75,17 +75,17 @@ func GetIp() (string, error) {
 //shh := grpc.NewServer() // 创建gRPC服务器
 //healthcheck := health.NewServer()
 //healthpb.RegisterHealthServer(shh, healthcheck)
-func InitRegisterServer(group, service string) error {
+func InitRegisterServer(group, service string) (string, error) {
 	ip, err := GetIp()
 	consulConfig, err := getConsulConfig(group, service)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 	consulCon := ConsulConfigs{}
 	err = yaml.Unmarshal([]byte(consulConfig), &consulCon)
 	if err != nil {
-		return err
+		return "", err
 	}
 	//consul配置
 	cfig := consulCon.Consul
@@ -130,5 +130,5 @@ func InitRegisterServer(group, service string) error {
 	if err != nil {
 		zap.S().Panic(err.Error())
 	}
-	return nil
+	return ip, nil
 }

@@ -33,6 +33,9 @@ func getConfig(serviceName string) (*Config, error) {
 	}
 	return cnf, nil
 }
+
+var IP string
+
 func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	cof, err := getConfig(serviceName)
 
@@ -44,7 +47,7 @@ func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err.Error())
 	}
-	err = consul.InitRegisterServer("DEFAULT_GROUP", "grpc")
+	ip, err := consul.InitRegisterServer("DEFAULT_GROUP", "grpc")
 	if err != nil {
 
 		return err
@@ -61,6 +64,8 @@ func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+
+	IP = ip
 	return err
 }
 
