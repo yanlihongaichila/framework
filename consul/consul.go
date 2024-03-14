@@ -15,14 +15,13 @@ import (
 
 var (
 	ConsulClient *api.Client
-	SrvId        string
-	err          error
 )
 
 type ConsulConfigs struct {
 	Consul struct {
 		Ip      string `yaml:"ip"`
 		Port    int    `yaml:"port"`
+		Secret  string `yaml:"secret"`
 		Version string `yaml:"version"`
 	} `yaml:"consul"`
 	Rpc struct {
@@ -94,10 +93,7 @@ func InitRegisterServer(group, service string) (string, error) {
 	rfig := consulCon.Rpc
 
 	//使用默认配置
-	config := api.Config{Address: fmt.Sprintf("%v:%v", ip, cfig.Port)}
-
-	//配置consul的连接地址
-	config.Address = fmt.Sprintf("%v:%v", cfig.Ip, cfig.Port)
+	config := api.Config{Address: fmt.Sprintf("%v:%v", ip, 8500)}
 
 	//示例化客户端
 	ConsulClient, err = api.NewClient(&config)
@@ -115,17 +111,14 @@ func InitRegisterServer(group, service string) (string, error) {
 	}
 
 	//健康检查,检查我们注册的微服务
-
-	Registration := api.AgentServiceRegistration{}
-	Registration.Address = ip
-	Registration.Port = rfig.Port
-	Registration.Name = rfig.Key
-	Registration.Tags = []string{cfig.Version}
-	Registration.ID = fmt.Sprintf("%s", uuid.NewV4())
-	SrvId = Registration.ID
-	Registration.Check = check
-
-	err = ConsulClient.Agent().ServiceRegister(&Registration)
+	err = ConsulClient.Agent().ServiceRegister(&api.AgentServiceRegistration{
+		ID:      fmt.Sprintf("%s", uuid.NewV4()),
+		Name:    rfig.Key,
+		Tags:    []string{cfig.Version},
+		Port:    rfig.Port,
+		Address: ip,
+		Check:   check,
+	})
 
 	if err != nil {
 		zap.S().Panic(err.Error())

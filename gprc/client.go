@@ -1,10 +1,11 @@
 package gprc
 
 import (
-	"github.com/yanlihongaichila/framework/consul"
 	"github.com/yanlihongaichila/framework/nacos"
 	"google.golang.org/grpc"
 	"gopkg.in/yaml.v2"
+
+	_ "github.com/mbobakov/grpc-consul-resolver"
 )
 
 const (
@@ -28,12 +29,13 @@ func Client(toService string) (*grpc.ClientConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	cnfs := new(consul.ConsulConfigs)
-	appCn := new(Val)
+	cnfs := new(Val)
 	err = yaml.Unmarshal([]byte(cnfStr), &cnfs)
 	if err != nil {
 		return nil, err
 	}
-	err = yaml.Unmarshal([]byte(cnfStr), &appCn)
-	return grpc.Dial("consul://"+cnfs.Consul.Ip+":"+cnfs.Consul.Ip+"/"+appCn.App.Secret+"?wait=14s", grpc.WithInsecure(), grpc.WithDefaultServiceConfig(`{"LoadBalancingPolicy": "round_robin"}`))
+
+	//return grpc.Dial("10.2.171.14:8077", grpc.WithBlock(), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	return grpc.Dial("consul://10.2.171.14:8500/"+cnfs.App.Secret+"?wait=14s", grpc.WithInsecure(), grpc.WithDefaultServiceConfig(`{"LoadBalancingPolicy": "round_robin"}`))
+
 }

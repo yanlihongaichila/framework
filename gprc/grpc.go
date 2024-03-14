@@ -34,38 +34,38 @@ func getConfig(serviceName string) (*Config, error) {
 	return cnf, nil
 }
 
-var IP string
-
 func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	cof, err := getConfig(serviceName)
-
 	if err != nil {
 		return err
 	}
-	lis, err := net.Listen("tcp", fmt.Sprintf("%v:%v", "0.0.0.0", cof.App.Port))
+	ip, err := consul.GetIp()
+	if err != nil {
+		return err
+	}
+	lis, err := net.Listen("tcp", fmt.Sprintf("%v:%v", ip, cof.App.Port))
 
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err.Error())
 	}
-	ip, err := consul.InitRegisterServer("DEFAULT_GROUP", "grpc")
+	_, err = consul.InitRegisterServer("DEFAULT_GROUP", serviceName)
 	if err != nil {
 
 		return err
 	}
 
+	//健康检测
 	s := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
 	//反射
 	reflection.Register(s)
-	//支持健康检查
-	//healthpb.RegisterHealthServer(s, health.NewServer())
+
 	fu(s)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 
-	IP = ip
 	return err
 }
 
