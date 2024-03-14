@@ -93,7 +93,7 @@ func InitRegisterServer(group, service string) (string, error) {
 	rfig := consulCon.Rpc
 
 	//使用默认配置
-	config := api.Config{Address: fmt.Sprintf("%v:%v", ip, 8500)}
+	config := api.Config{Address: fmt.Sprintf("%v:%v", cfig.Ip, 8500)}
 
 	//示例化客户端
 	ConsulClient, err = api.NewClient(&config)
