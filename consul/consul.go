@@ -121,7 +121,8 @@ func InitRegisterServer(group, service string) (string, error) {
 	})
 
 	if err != nil {
-		zap.S().Panic(err.Error())
+		fmt.Println(err)
+		return "", err
 	}
 	return ip, nil
 }

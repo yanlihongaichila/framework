@@ -112,13 +112,12 @@ func ExistInfo(ctx context.Context, group, server, key string) bool {
 	return true
 }
 
-
-//分布式锁
-func Lock(ctx context.Context, group, server, key string)  {
-	err := withRedis(group, server, func(cli *redis.Client) error {
-
-	}
-	if err != nil {
-		return 
-	}
+// 分布式锁
+func Lock(ctx context.Context, group, server, key string) {
+	//err := withRedis(group, server, func(cli *redis.Client) error {
+	//
+	//}
+	//if err != nil {
+	//	return
+	//}
 }
