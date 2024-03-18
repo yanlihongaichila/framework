@@ -43,6 +43,8 @@ func ConcentGrpc(serviceName string, fu func(s *grpc.Server)) error {
 	if err != nil {
 		return err
 	}
+	//本地的话修改端口(端口随机)
+	//docker的话改ip(ip随机)
 	lis, err := net.Listen("tcp", fmt.Sprintf("%v:%v", ip, cof.App.Port))
 
 	if err != nil {

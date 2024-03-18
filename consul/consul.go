@@ -38,6 +38,27 @@ func getConsulConfig(group, service string) (string, error) {
 	}
 	return config, nil
 }
+
+// 获取地址
+func getIps() (ips []string) {
+	interfaceAddr, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Printf("fail to get net interfaces ipAddress: %v\n", err)
+		return ips
+	}
+
+	for _, address := range interfaceAddr {
+		ipNet, isVailIpNet := address.(*net.IPNet)
+		// 检查ip地址判断是否回环地址
+		if isVailIpNet && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				ips = append(ips, ipNet.IP.String())
+			}
+		}
+	}
+	return ips
+}
+
 func GetIp() (string, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {

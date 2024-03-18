@@ -113,11 +113,32 @@ func ExistInfo(ctx context.Context, group, server, key string) bool {
 }
 
 // 分布式锁
-func Lock(ctx context.Context, group, server, key string) {
-	//err := withRedis(group, server, func(cli *redis.Client) error {
-	//
-	//}
-	//if err != nil {
-	//	return
-	//}
+// isContinue 的意思是存在分布式锁的时候是否需要阻塞
+func Lock(ctx context.Context, group, serviceName, key string, val interface{}, duration time.Duration, isContinue bool) (bool, error) {
+	var re = false
+
+	err := withRedis(group, serviceName, func(cli *redis.Client) error {
+		if !isContinue {
+			for {
+				res, err := cli.SetNX(ctx, key, val, duration).Result()
+				if err != nil {
+					return err
+				}
+				re = true
+				if res {
+					return nil
+				}
+			}
+		}
+		res, err := cli.SetNX(ctx, key, val, duration).Result()
+		re = res
+		return err
+	})
+	return re, err
+}
+
+func UnLock(ctx context.Context, group, serviceName, key string) error {
+	return withRedis(group, serviceName, func(cli *redis.Client) error {
+		return cli.Del(ctx, key).Err()
+	})
 }
